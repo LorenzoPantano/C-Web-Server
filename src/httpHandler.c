@@ -6,6 +6,7 @@
 #include "httpHandler.h"
 
 
+
 /**
  * Handles the GET request
  * @param socket the socket where to respond
@@ -33,6 +34,17 @@ int handleGETRequest(int socket, char *filepath, char *userAgent, float quality)
     else strcat(file, filepath);
 
     printf("Handling GET Request on socket %d, file: %s\nUser Agent: %s\n", socket, file, userAgent);
+
+    uaInfoStructPtr detectionResult = detectDeviceFromUserAgent(userAgent);
+    if (detectionResult == NULL){
+        printf("Error\n");
+    } else {
+        printf("Success\n");
+        printf("DETECTION RESULTS : \n");
+        printf("isMobile: %s\n", detectionResult->isMobile);
+        printf("Screen Width: %d\n", detectionResult->screenWidth);
+        printf("Screen Height: %d\n", detectionResult->screenHeight);
+    }
 
     //File operations
     fd = open(file, O_RDONLY);

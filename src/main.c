@@ -4,7 +4,6 @@
 #define MAX_BYTES 4096
 
 /* ---- 51 DEGREES COPIED HEADERS ----- */
-#include "51DegreesDeviceDetection/deviceDetection.h"
 
 
 int main(int argc, char const *argv[])
@@ -25,12 +24,6 @@ int main(int argc, char const *argv[])
 
 
     /*---51 DEGREES TEST ---*/
-    int result = detectDeviceFromUserAgent("Mozilla/5.0 (Linux; Android 9; SM-J337P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.136 Mobile Safari/537.36");
-    if (result == 0) {
-        printf("Success\n");
-    } else  {
-        printf("Error\n");
-    }
     
 
 	/*	Server socket

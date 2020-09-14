@@ -11,10 +11,12 @@
 #include <stdio.h>
 #include "./src/hash/hash.h"
 #include "./src/hash/fiftyone.h"
+#include "../userAgentInfoStruct.h"
+
 
 // Variables
 static const char *dataDir = "../src/51DegreesDeviceDetection/device-detection-data";
 static const char *dataFileName = "51Degrees-LiteV4.1.hash";
 static char valueBuffer[1024] = "";
 
-int detectDeviceFromUserAgent(const char *userAgent);
+uaInfoStructPtr detectDeviceFromUserAgent(const char *userAgent);
