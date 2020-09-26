@@ -18,8 +18,8 @@
 
 //Header files
 #include "errorHandler.h"
-#include "utils.h"
 #include "51DegreesDeviceDetection/deviceDetection.h"
+#include "img.h"
 
 //Variables
 int bytes_sent;

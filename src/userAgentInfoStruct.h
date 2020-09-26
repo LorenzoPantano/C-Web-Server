@@ -4,7 +4,7 @@
 */
 
 struct uaInfoStruct {
-    char *isMobile;
+    int isMobile;
     int screenWidth;
     int screenHeight;
 };

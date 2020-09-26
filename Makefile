@@ -1,13 +1,13 @@
 CC		:= gcc
 CFLAGS	:= -Wall -Wextra -g -lm
-LDFLAGS := -pthread -lpthread -lm -Llib -lfiftyone-common-c -Llib -lfiftyone-hash-c -Llib -lfiftyone-device-detection-c
+LDFLAGS := -pthread -lpthread -Llib -lfiftyone-common-c -Llib -lfiftyone-hash-c -Llib -lfiftyone-device-detection-c -Llib -lturbojpeg
 
 BIN		:= bin
 SRC		:= src
 INCLUDE	:= include
 LIB		:= lib
 
-LIBRARIES	:= 
+LIBRARIES	:= -Llib -lturbojpeg -lrt -lm
 
 ifeq ($(OS),Windows_NT)
 EXECUTABLE	:= main.exe

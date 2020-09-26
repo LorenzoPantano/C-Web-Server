@@ -3,7 +3,8 @@
 #define BACKLOG 10000
 #define MAX_BYTES 4096
 
-/* ---- 51 DEGREES COPIED HEADERS ----- */
+/* ---- JPEG IMAGE TEST ----- */
+
 
 
 int main(int argc, char const *argv[])
@@ -21,9 +22,6 @@ int main(int argc, char const *argv[])
 
     printf("Port number: %d\n", portNumber);
     printf("Cache: %d, Dim: %d\n", isCacheEnabled, cacheDim);
-
-
-    /*---51 DEGREES TEST ---*/
     
 
 	/*	Server socket
@@ -70,7 +68,9 @@ int main(int argc, char const *argv[])
         client_len = sizeof(client_addr);
 
         //Accept call
+        printf("Accepting\n");
         conn_socket = accept(list_socket, (struct sockaddr *) &client_addr, &client_len);
+        printf("Accepted\n");
         if (conn_socket < 0) {
             perror("Accept error");
             exit(EXIT_FAILURE);
@@ -91,8 +91,6 @@ int main(int argc, char const *argv[])
         pthread_t tid;
         struct pthread_param *param = malloc(sizeof(struct pthread_param));  //Thread parameters
         param->socket = conn_socket;
-        //printf("Conn socket: %d\n", conn_socket);                          //Debug
-        //printf("Param socket: %d\n", param->socket);                       //Socket 
         strcpy(param->ip_address, client_ip_addr);                           //Client ip address
 
         if (pthread_create(&(param->tid), NULL, (void *) handleClientConnection, param))
@@ -320,15 +318,4 @@ void handleClientConnection(void *thread_params) {
         close(params->socket);
         pthread_exit((void *)EXIT_SUCCESS);
     }
-
-    // ---------- TEST -------- //
-    /*btyes_recvd = send(params->socket, buffer, strlen(buffer), 0);
-    if (btyes_recvd > 0) {
-        printf("Bytes sent: %d\n", btyes_recvd);
-        time_t ltime; // calendar time
-        ltime=time(NULL); // get current cal time
-        printf("%s",asctime( localtime(&ltime) ) );
-        close(params->socket);
-    }*/
-    
 }

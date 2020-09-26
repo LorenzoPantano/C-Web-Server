@@ -66,30 +66,36 @@ uaInfoStructPtr fiftyoneDegreesHashGettingStarted(const char *userAgent, const c
         printf("%s\n", ExceptionGetMessage(exception));
     }
     printf("IsMobile: %s\n", getPropertyValueAsString(results, "IsMobile"));
+    if (strcmp(getPropertyValueAsString(results, "IsMobile"),"True") == 0) {
+        resultsStruct->isMobile = 1;
+    } else {
+        resultsStruct->isMobile = 0;
+    }
     printf("Screen Width: %s\n", getPropertyValueAsString(results, "ScreenPixelsWidth"));
-    printf("Screen Height: %s\n", getPropertyValueAsString(results, "ScreenPixelsHeight"));
-
-    resultsStruct->isMobile = getPropertyValueAsString(results, "IsMobile");
     resultsStruct->screenWidth = atoi(getPropertyValueAsString(results, "ScreenPixelsWidth"));
-    resultsStruct->screenHeight = atoi(getPropertyValueAsString(results, "ScreenPixelsHeight"));
+    printf("Screen Height: %s\n", getPropertyValueAsString(results, "ScreenPixelsHeight"));
+    resultsStruct->screenHeight = atoi(getPropertyValueAsString(results, "ScreenPixelsHeight")); 
 
     ResultsHashFree(results);
     // Free the resources used by the manager.
     ResourceManagerFree(&manager);
 
+    printf("IS MOBILE: %d\n", resultsStruct->isMobile);
     return resultsStruct;
 }
 
-//Complete one function
+/**
+ * Detect Device From User-Agent
+ * @param userAgent the user-agent string to be analized
+ * @return A pointer to a uaInfoStruct which will contain the results of the 
+ * detection, such as:
+ * IsMobile: (char *) Tells if the device is a mobile device
+ * SceenWidth: (int) The Screen Width of the device
+ * ScreenHeight: (int) The Screen Height of the device
+*/
 uaInfoStructPtr detectDeviceFromUserAgent(const char *userAgent){
 
     printf("Detecting...\n");
-
-    uaInfoStructPtr resultsStruct = (uaInfoStructPtr) malloc(sizeof(struct uaInfoStruct));
-    if (resultsStruct == NULL) {
-        printf("Malloc error\n");
-        return NULL;
-    }
 
     StatusCode status = SUCCESS;
     ConfigHash config = HashDefaultConfig;
@@ -109,11 +115,5 @@ uaInfoStructPtr detectDeviceFromUserAgent(const char *userAgent){
     dmalloc_debug_setup("log-stats,log-non-free,check-fence,log=dmalloc.log");
 #endif
 #endif
-    
-    resultsStruct = fiftyoneDegreesHashGettingStarted(userAgent, dataFilePath, &config);
-    if (resultsStruct == NULL) {
-        printf("Hash Getting Started Error\n");
-        return NULL;
-    }
-    return resultsStruct;
+    return fiftyoneDegreesHashGettingStarted(userAgent, dataFilePath, &config);
 }

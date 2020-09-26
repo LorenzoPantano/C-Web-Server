@@ -41,10 +41,53 @@ int handleGETRequest(int socket, char *filepath, char *userAgent, float quality)
     } else {
         printf("Success\n");
         printf("DETECTION RESULTS : \n");
-        printf("isMobile: %s\n", detectionResult->isMobile);
+        printf("isMobile: %d\n", detectionResult->isMobile);
         printf("Screen Width: %d\n", detectionResult->screenWidth);
         printf("Screen Height: %d\n", detectionResult->screenHeight);
     }
+
+    /**
+     * Skip index.html and favicon.ico files from optimization.
+    */
+    if ((strcmp(file, "../files/index.html")) == 0 || (strcmp(file, "../files/favicon.ico") == 0)) {
+        goto send;
+    } else {
+
+        /**
+         * Mobile Optimization:
+         * 
+        */
+
+        if (detectionResult->isMobile == 1) {
+            
+            char *actualName = compressAndCacheImg(file, 1, detectionResult->screenWidth, detectionResult->screenHeight, quality);
+            if (actualName == NULL) {
+                printf("Error compressing image: sending base quality\n");
+                goto send;
+            } else {
+                strcpy(file, "");
+                strcat(file, "../files/cache/");
+                char cacheName[512] = "";
+                printf("ACTUAL NAME ASDASD: %s\n", actualName);
+                sprintf(cacheName, "%s-%.2f-%d-%d.jpg", actualName, quality, detectionResult->screenWidth, detectionResult->screenHeight);
+                strcat(file, cacheName);
+                printf("FILE TO BE SENT: %s\n", file);
+                goto send;
+            }
+
+        } else {
+
+            /**
+             * TODO: Compress and send
+            */
+
+        }
+
+    }
+
+
+
+send:
 
     //File operations
     fd = open(file, O_RDONLY);

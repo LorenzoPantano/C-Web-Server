@@ -215,3 +215,33 @@ char *extracImageQualityAccept(char *acceptHeader){
         return NULL;
     }
 }
+
+int *roundToClosestScalingFactor(float num) {
+    static int closest[2] = {1,1};
+    float possibleValues[] = {1, (float)7/(float)8, (float)3/(float)4, (float)5/(float)8, (float)1/(float)2, (float)3/(float)8, (float)1/(float)4, (float)1/(float)8};
+    int numDenomPairs[8][2] = {{1,1}, {7,8}, {3,4}, {5,8}, {1,2}, {3,8}, {1,4}, {1,8}};
+    for (int i = 0; i < 6; i++) {
+        if ((num < possibleValues[i]) && (num > possibleValues[i+1])) {
+            closest[0] = numDenomPairs[i][0];
+            closest[1] = numDenomPairs[i][1];
+            printf("Returning... %d %d\n", closest[0], closest[1]);
+            return closest;
+        } else if (num > 1) {
+           printf("Returning... %d %d\n", closest[0], closest[1]);
+            return closest;
+        } else if (num < possibleValues[7]){  //Last case 1/8
+            closest[0] = numDenomPairs[7][0];
+            closest[1] = numDenomPairs[7][1];
+            printf("Returning... %d %d\n", closest[0], closest[1]);
+            return closest;
+        }
+    }
+}
+
+char *extractActualName(char *imgname) {
+    char *actualName = strtok(imgname, "/");
+    actualName = strtok(NULL, "/");
+    actualName = strtok(NULL, "/");
+    actualName = strtok(NULL, "/");
+    return actualName;
+}

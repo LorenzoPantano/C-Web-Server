@@ -13,7 +13,6 @@
 #include "./src/hash/fiftyone.h"
 #include "../userAgentInfoStruct.h"
 
-
 // Variables
 static const char *dataDir = "../src/51DegreesDeviceDetection/device-detection-data";
 static const char *dataFileName = "51Degrees-LiteV4.1.hash";
