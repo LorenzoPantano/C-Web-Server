@@ -245,7 +245,7 @@ void handleClientConnection(void *thread_params) {
         } else {
             quality = strtof(qualityString+2, NULL);
         }
-        printf("QUALITY: %f\n", quality);
+        //printf("QUALITY: %f\n", quality);
 
         /**
          * Parse the http request to extract:
@@ -259,10 +259,6 @@ void handleClientConnection(void *thread_params) {
             exit(EXIT_FAILURE);
         }
         httpFieldsParsed = parseHttpRequest(buffer);   // Function parseHttpRequest --> utils.c
-        printf("HTTP PARSED: %s\n", httpFieldsParsed->method);
-        printf("HTTP PARSED: %s\n", httpFieldsParsed->file);
-        printf("HTTP PARSED: %s\n", httpFieldsParsed->version);
-
 
         int request_type = requestType(httpFieldsParsed->method);
 
@@ -299,7 +295,6 @@ void handleClientConnection(void *thread_params) {
                 break;
 
         }
-
 
         bzero(buffer, MAX_BYTES);
         btyes_recvd = recv(params->socket, buffer, sizeof(buffer), 0);        // Recieve next request from Client

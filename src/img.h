@@ -3,13 +3,13 @@
 #include <string.h>
 #include <errno.h>
 #include <turbojpeg.h>
-#include "utils.h"
 #include <semaphore.h>
+#include "cache.h"
 
-sem_t mutex;
+sem_t sem;
 
 #define DEFAULT_QUALITY  95
 
 char *compressAndCacheImg(char *imgname, int isMobile, int screenWidth, int screenHeight, float quality);
-int compressAndResize(char *actualName, int screenWidth, int screenHeight, float quality);
-int compress(char *actualName);
+int compressAndResize(char *actualName, int screenWidth, int screenHeight, int quality);
+int compress(char *actualName, int quality);

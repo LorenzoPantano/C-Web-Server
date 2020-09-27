@@ -50,42 +50,132 @@ int handleGETRequest(int socket, char *filepath, char *userAgent, float quality)
      * Skip index.html and favicon.ico files from optimization.
     */
     if ((strcmp(file, "../files/index.html")) == 0 || (strcmp(file, "../files/favicon.ico") == 0)) {
-        goto send;
+        //Send file directly
     } else {
 
         /**
          * Mobile Optimization:
-         * 
+         * TODO: Documentation
         */
 
         if (detectionResult->isMobile == 1) {
+
+            /*
+             * /**
+             * Verify if file is in cache.
+             * Mobile cache and not mobile are different.
+             * Mobile optimized images are also resized for different 
+             * screen sizes.
             
+            printf("FILE: %s\n", file);
+            char filename[512] = "";
+            strcat(filename, file);
+            printf("FILENAME: %s\n", filename);
+            char *cacheName = verifyCache(filename, (int)(quality*100), detectionResult->screenWidth, detectionResult->screenHeight );
+            if (cacheName != NULL) {  //Cache hit
+                strcpy(file, "");
+                strcat(file, "../files/cache/");
+                strcat(file, cacheName);
+                printf("FILE TO BE SENT ALREADY IN CACHE: %s\n", file);
+            } else {  //Cache miss
+                printf("File not in cache, compressing...(MOBILE)\n");
+                char *actualName = compressAndCacheImg(filename, 1, detectionResult->screenWidth, detectionResult->screenHeight, quality);
+                if (actualName == NULL) {
+                    printf("Error compressing image: sending base quality\n");
+                } else {
+                    strcpy(file, "");
+                    strcat(file, "../files/cache/");
+                    char cacheName[512] = "";
+                    sprintf(cacheName, "%s-%d-%d-%d.jpg", actualName, (int)(quality*100), detectionResult->screenWidth, detectionResult->screenHeight);
+                    strcat(file, cacheName);
+                    printf("FILE TO BE SENT: %s\n", file);
+                }
+            }
+            */
+
+            char filename[512] = "";
+            strcat(filename, file);
+            printf("FILENAME: %s\n", filename);
+            
+            int cacheResult = verifyCache(filename, (int)(quality*100), detectionResult->screenWidth, detectionResult->screenHeight );
+            if (cacheResult == 0) {  //Cache hit
+
+                strcpy(filename, "");
+                strcat(filename, file);
+
+                strcpy(file, "");
+                strcat(file, "../files/cache/");
+                char *cacheName = buildCacheName(filename,(int)(quality*100), detectionResult->screenWidth, detectionResult->screenHeight);
+                printf("CACHE NAME MOBILE !WEA: %s\n", cacheName);
+                strcat(file, cacheName);
+                printf("FILE TO BE SENT ALREADY IN CACHE: %s\n", file);
+                goto send;
+            }
+
             char *actualName = compressAndCacheImg(file, 1, detectionResult->screenWidth, detectionResult->screenHeight, quality);
             if (actualName == NULL) {
                 printf("Error compressing image: sending base quality\n");
-                goto send;
             } else {
                 strcpy(file, "");
                 strcat(file, "../files/cache/");
                 char cacheName[512] = "";
                 printf("ACTUAL NAME ASDASD: %s\n", actualName);
-                sprintf(cacheName, "%s-%.2f-%d-%d.jpg", actualName, quality, detectionResult->screenWidth, detectionResult->screenHeight);
+                sprintf(cacheName, "%s-%d-%d-%d.jpg", actualName, (int)(quality*100), detectionResult->screenWidth, detectionResult->screenHeight);
                 strcat(file, cacheName);
                 printf("FILE TO BE SENT: %s\n", file);
-                goto send;
             }
 
         } else {
+            
+            /**
+             * Not Mobile optimization
+             * TODO: Compress and send
+             * 
+            */
 
             /**
-             * TODO: Compress and send
+             * Verify if file is already in cache.
             */
+           
+            printf("FILE NOT MOBILE: %s\n", file);
+            char filename[512] = "";
+            strcat(filename, file);
+            printf("FILENAME NOT MOBILE: %s\n", filename);
+            int cacheResult = verifyCache(filename, (int)(quality*100), 0, 0);
+            if (cacheResult == 0) { //Cache hit
+                printf("CACHE HIT\n");
+                char filename[512] = "";
+                strcat(filename, file);
+                strcpy(file, "");
+                strcat(file, "../files/cache/");
+                printf("FILENAME CACHE HIT: %s\n", filename);
+                char *cacheName = buildCacheName(filename,(int)(quality*100), 0, 0);
+                printf("CACHE NAME CACHE HIT: %s\n", cacheName);
+                strcat(file, cacheName);
+                printf("FILE TO BE SENT ALREADY IN CACHE (NOT MOBILE): %s\n", file);
+                goto send;
+            } else { //Cache miss
+                printf("File not in cache, compressing...(NOT MOBILE)\n");
+                char filename[512] = "";
+                strcat(filename, file);
+                char *actualName = compressAndCacheImg(filename, 0, 0, 0, quality);
+                if (actualName == NULL) {
+                    printf("Error compressing image: sending base quality\n");
+                } else {
+                    char filename[512] = "";
+                    strcat(filename, file);
+                    strcpy(file, "");
+                    strcat(file, "../files/cache/");
+                    char *cacheName = buildCacheName(filename, (int)(quality*100), 0, 0);
+                    strcat(file, cacheName);
+                    printf("FILE TO BE SENT: %s\n", file);
+                }
+            }
+
 
         }
 
     }
-
-
 
 send:
 
@@ -122,33 +212,34 @@ send:
         //Internal server error 500
         sendErrorMessage(socket, 500);
         pthread_exit((void *)EXIT_FAILURE);
+        return -1;
     }
     else {
-        //printf("Bytes sent from header message: %d\n", bytes_sent);  //debug
+
         bytes_sent = sendfile(socket, fd, NULL, file_size);
-        //printf("Bytes sent: %d\n", bytes_sent);  //debug
         /**
          * If bytes sent is less then actual file size, send again
          * till the file is entirely sent.
          * */                    
         while (bytes_sent < file_size)                                     
-            {                                                               
-                bytes_sent = sendfile(socket, fd, NULL, file_size);         
-                printf("Bytes sent: %d\n", bytes_sent);  //debug
-                if (bytes_sent <= 0){
-                    perror("Error sending file");
-                    close(fd);
-                    sendErrorMessage(socket, 500);
-                    return -1;
-                }
+        {                                                               
+            bytes_sent = sendfile(socket, fd, NULL, file_size);         
+            printf("Bytes sent: %d\n", bytes_sent);  //debug
+            if (bytes_sent <= 0){
+                perror("Error sending file");
+                close(fd);
+                sendErrorMessage(socket, 500);
+                return -1;
             }
+        }
 
         close(fd);  //Close file descriptor
+        printf("Closed FD\n");
+        printf("BYTES SENT: %d\n", bytes_sent);
         return bytes_sent;
     }
-    
-    
 
+    return bytes_sent;
 }
 
 void handleHEADRequest(){

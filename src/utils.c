@@ -238,6 +238,12 @@ int *roundToClosestScalingFactor(float num) {
     }
 }
 
+
+/**
+ * Extract Actual Name
+ * @param imgname: The imgname to extract only the name (../file/img/imgname.jpg)
+ * @return The actual name of the image (imgname.jpg)
+*/
 char *extractActualName(char *imgname) {
     char *actualName = strtok(imgname, "/");
     actualName = strtok(NULL, "/");
