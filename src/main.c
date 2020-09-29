@@ -245,7 +245,6 @@ void handleClientConnection(void *thread_params) {
         } else {
             quality = strtof(qualityString+2, NULL);
         }
-        //printf("QUALITY: %f\n", quality);
 
         /**
          * Parse the http request to extract:
@@ -259,8 +258,11 @@ void handleClientConnection(void *thread_params) {
             exit(EXIT_FAILURE);
         }
         httpFieldsParsed = parseHttpRequest(buffer);   // Function parseHttpRequest --> utils.c
+        
 
         int request_type = requestType(httpFieldsParsed->method);
+
+        printf("REQUEST TYPE: %d\n", request_type);
 
         /*
         *   Different actions based on the method.
@@ -282,7 +284,13 @@ void handleClientConnection(void *thread_params) {
 
             //HEAD
             case 2:
-                handleHEADRequest();
+                result_bytes = handleHEADRequest(params->socket, httpFieldsParsed->file);
+                if (result_bytes > 0) {
+                    printf("Sent succesfully to client: %s on socket %d\n\n\n", params->ip_address, params->socket);
+                } else {
+                    perror("Error handling HEAD request");
+                    pthread_exit((void *)EXIT_FAILURE);
+                }
                 break;
 
             //POST

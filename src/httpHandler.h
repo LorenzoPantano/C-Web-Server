@@ -27,4 +27,4 @@ int fd;
 
 //Function Prototypes
 int handleGETRequest(int socket, char *filepath, char *userAgent, float quality);
-void handleHEADRequest();
+int handleHEADRequest(int socket, char *filepath);

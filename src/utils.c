@@ -1,6 +1,7 @@
 #include "utils.h"
 
 /**
+ * Is A Number
  * Check if the given string is made of digits
  * @param string the string to check
  * @return 1 if is made of digit, 0 otherwise
@@ -19,19 +20,20 @@ int isANumber(const char *string)
 }
 
 /**
-*   Return the equivalent integer for the 
-*   method specified in the http request.
-*   @param method the string method.
-*   @return GET = 1 / HEAD = 2 / POST = 3
+ *  Request Type 
+ *  Return the equivalent integer for the 
+ *  method specified in the http request.
+ *  @param method the string method.
+ *  @return GET = 1 / HEAD = 2 / POST = 3
 */
 int requestType(char *method) {
     int type = -1;
     if (strncmp(method, "GET\0", 4) == 0)
         type = 1;
     else if (strncmp(method, "POST\0", 5) == 0)
-        type = 2;
-    else if (strncmp(method, "HEAD\0", 5) == 0)
         type = 3;
+    else if (strncmp(method, "HEAD\0", 5) == 0)
+        type = 2;
     else
         type = -1;
     return type;
@@ -39,6 +41,7 @@ int requestType(char *method) {
 
 
 /**
+ * Send Header Message
  * Sends header of HTTP response message with HTTP 1.1 syntax
  * @param socket descriptor of the socket
  * @param head the first line of HTTP response message
@@ -98,6 +101,7 @@ int sendHeaderMessage(int socket, char *head, char *media, int file_size)
 
 
 /**
+ * Get Content Type
  * This function gets the content type of the requested file from its extension.
  * @param path the path of the file
  * @return myme type of the file
@@ -137,6 +141,7 @@ char* getContentType(char *path)
 }
 
 /**
+ * Parse Http Request
  * This function takes the complete http request 
  * and extracts the following data, returning them
  * in a httpFields struct pointer
@@ -196,6 +201,12 @@ char *extractSubString(char *httpRequest, char *pattern1, char *pattern2) {
     }
 }
 
+/**
+ * Extract Image Quality Accept
+ * @param acceptHeader The Accept: field of the http request
+ * @return The quality factor right after the keyword "image", NULL if there's none
+*/
+
 char *extracImageQualityAccept(char *acceptHeader){
 
     /**
@@ -215,6 +226,15 @@ char *extracImageQualityAccept(char *acceptHeader){
         return NULL;
     }
 }
+
+/**
+ * Round to closest scaling factor
+ * Takes the screenWidth/screenHeight division and calculates
+ * the closest scaling factors according to the turbojpeg api
+ * rules to resize an image.
+ * @param num The result of screenWidth/screenHeight
+ * @return A pointer to integer array containing the results
+*/
 
 int *roundToClosestScalingFactor(float num) {
     static int closest[2] = {1,1};

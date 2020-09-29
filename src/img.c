@@ -1,9 +1,20 @@
 #include "img.h"
 
+//For turbo Jpeg compression operation
 const char *subsampName[TJ_NUMSAMP] = {
   "4:4:4", "4:2:2", "4:2:0", "Grayscale", "4:4:0", "4:1:1"
 };
 
+
+/**
+ * Compress And Cache Img
+ * @param imgname The string name of the image
+ * @param isMobile Integer rapresenting if device is mobile (1) or not (0)
+ * @param screenWidth Screen Width of the device (0 if desktop or unknown)
+ * @param screenHeight Screen Height of the device (0 if desktop or unknown)
+ * @param quality The quality factor
+ * @return The string name of the image, only the name with no extension (will be useful for buildCacheName function)
+*/
 char *compressAndCacheImg(char *imgname, int isMobile, int screenWidth, int screenHeight, float quality) {
     
     //Extract img name with extenstion
@@ -39,6 +50,14 @@ char *compressAndCacheImg(char *imgname, int isMobile, int screenWidth, int scre
     }
 }
 
+/**
+ * Compress
+ * This function is the compressing procedure for 
+ * desktop (or unknown) devices.
+ * @param actualName The string name of the image with .jpg extension
+ * @param quality The quality factor in integer format (float quality * 100)
+ * @return Integer result (0 No Errors, 1 Errors occurred)
+*/
 int compress(char *actualName, int quality) {
 
     tjhandle tjInstance = NULL;
@@ -118,7 +137,7 @@ int compress(char *actualName, int quality) {
     tjInstance = NULL;
     jpegBuf = NULL;  /* Dynamically allocate the JPEG buffer */
 
-    /* Setting the quality of the compression (DEFAULT = 95) */
+    /* Setting the quality of the compression (DEFAULT = 100) */
     if (quality > 95 || quality < 0) quality = DEFAULT_QUALITY;
     if (outQual < 0) outQual = quality;
 
@@ -145,7 +164,7 @@ int compress(char *actualName, int quality) {
 
     /** 
      * CACHE OPERATION 
-     * Write the compressed and resized JPEG image to disk. 
+     * Write the compressed image to disk. 
     */
 
     //Building cache name
@@ -182,6 +201,15 @@ int compress(char *actualName, int quality) {
 
 }
 
+/**
+ * Compress And Resize
+ * Compress operation for mobile devices
+ * @param actualName The string name of the image with .jpg extension
+ * @param screenWidth The screen width of the device
+ * @param screenHeight The screen height of the device
+ * @param quality The quality factor (integer)
+ * @return Integer result (0 No Errors, 1 Errors occurred)
+*/
 int compressAndResize(char *actualName, int screenWidth, int screenHeight, int quality) {
 
     /**

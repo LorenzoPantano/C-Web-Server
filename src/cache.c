@@ -8,6 +8,17 @@
  * {imgname}-{quality}-{sizeW}-{sizeH}
 */
 
+
+/**
+ * Verify Cache
+ * This function verifies that the requested file 
+ * is already in cache or not
+ * @param filename The image name with .jpg extension
+ * @param quality The quality factor (integer)
+ * @param screenWidth The device screen width
+ * @param screenHeight The device screen height
+ * @return Integer result (0 File is in cache, 1 File's not in cache)
+*/
 int verifyCache(char *filename, int quality, int screenWidth, int screenHeight) {
     
     char *imgName = extractActualName(filename);
@@ -16,7 +27,7 @@ int verifyCache(char *filename, int quality, int screenWidth, int screenHeight) 
     sprintf(cacheName, "%s-%d-%d-%d.jpg", imgName, quality, screenWidth, screenHeight);
 
     printf("VERIFY CACHE: %s\n", cacheName);
-    int res = searchInDir("../files/cache", 0, cacheName);
+    int res = searchInDir("../files/cache", cacheName);
     return res;
 
 }
@@ -42,36 +53,43 @@ char *buildCacheName(char *file, int quality, int screenWidth, int screenHeight)
     return cacheName;
 }
 
-int searchInDir(char *dir, int depth, char *cacheName)
+/**
+ * Search In Directory
+ * This function searches for a file in a specified directory
+ * @param dir The name of the directory in which start searching
+ * @param cacheName The file to search
+ * @return Integer result (0 Found, 1 Not Found)
+*/
+int searchInDir(char *dir, char *cacheName)
 {
     DIR *dp;
     struct dirent *entry;
     struct stat statbuf;
     if((dp = opendir(dir)) == NULL) {
-        fprintf(stderr,"cannot open directory: %s\n", dir);
+        fprintf(stderr,"Cannot open directory: %s\n", dir);
         return;
     }
     chdir(dir);
+    //Start searching...
     while((entry = readdir(dp)) != NULL) {
         lstat(entry->d_name,&statbuf);
         if(S_ISDIR(statbuf.st_mode)) {
-            /* Found a directory, but ignore . and .. */
+            //Found a directory, but ignore . and ..
             if(strcmp(".",entry->d_name) == 0 || strcmp("..",entry->d_name) == 0)
                 continue;
-            printf("%*s%s/\n",depth,"",entry->d_name);
-            if (strcmp(entry->d_name, cacheName) == 0) {
-                chdir("../../bin");
+            if (strcmp(entry->d_name, cacheName) == 0) { //Found
+                chdir("../../bin"); //Return to bin folder
                 return 0;
             }
         }
         else {
-            if (strcmp(entry->d_name, cacheName) == 0) {
-                chdir("../../bin");
+            if (strcmp(entry->d_name, cacheName) == 0) {  //Found
+                chdir("../../bin"); //Return to bin folder
                 return 0;
             }
         }
     }
-    chdir("../../bin");
+    chdir("../../bin"); //Return to bin folder
     closedir(dp);
     return 1;
 }

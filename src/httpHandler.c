@@ -55,47 +55,28 @@ int handleGETRequest(int socket, char *filepath, char *userAgent, float quality)
 
         /**
          * Mobile Optimization:
-         * TODO: Documentation
+         * Images for mobile devices are not only compressed
+         * but also resized based on their screen sizes.
+         * Different screen sizes and quality will produce different
+         * compressed images to be put in cache.
         */
 
         if (detectionResult->isMobile == 1) {
 
-            /*
-             * /**
+            /**
              * Verify if file is in cache.
              * Mobile cache and not mobile are different.
              * Mobile optimized images are also resized for different 
              * screen sizes.
-            
-            printf("FILE: %s\n", file);
-            char filename[512] = "";
-            strcat(filename, file);
-            printf("FILENAME: %s\n", filename);
-            char *cacheName = verifyCache(filename, (int)(quality*100), detectionResult->screenWidth, detectionResult->screenHeight );
-            if (cacheName != NULL) {  //Cache hit
-                strcpy(file, "");
-                strcat(file, "../files/cache/");
-                strcat(file, cacheName);
-                printf("FILE TO BE SENT ALREADY IN CACHE: %s\n", file);
-            } else {  //Cache miss
-                printf("File not in cache, compressing...(MOBILE)\n");
-                char *actualName = compressAndCacheImg(filename, 1, detectionResult->screenWidth, detectionResult->screenHeight, quality);
-                if (actualName == NULL) {
-                    printf("Error compressing image: sending base quality\n");
-                } else {
-                    strcpy(file, "");
-                    strcat(file, "../files/cache/");
-                    char cacheName[512] = "";
-                    sprintf(cacheName, "%s-%d-%d-%d.jpg", actualName, (int)(quality*100), detectionResult->screenWidth, detectionResult->screenHeight);
-                    strcat(file, cacheName);
-                    printf("FILE TO BE SENT: %s\n", file);
-                }
-            }
             */
 
+            /**
+             * Copy the file name string to another variable
+             * to avoid messing up the "file" string variable.
+             * This will be used often in the following lines.
+            */
             char filename[512] = "";
             strcat(filename, file);
-            printf("FILENAME: %s\n", filename);
             
             int cacheResult = verifyCache(filename, (int)(quality*100), detectionResult->screenWidth, detectionResult->screenHeight );
             if (cacheResult == 0) {  //Cache hit
@@ -106,11 +87,16 @@ int handleGETRequest(int socket, char *filepath, char *userAgent, float quality)
                 strcpy(file, "");
                 strcat(file, "../files/cache/");
                 char *cacheName = buildCacheName(filename,(int)(quality*100), detectionResult->screenWidth, detectionResult->screenHeight);
-                printf("CACHE NAME MOBILE !WEA: %s\n", cacheName);
                 strcat(file, cacheName);
                 printf("FILE TO BE SENT ALREADY IN CACHE: %s\n", file);
                 goto send;
             }
+
+            /**
+             * File not in cache.
+             * Image is compressed and then sent.
+             * In case of an error, the server will send the base image (not compressed)
+            */
 
             char *actualName = compressAndCacheImg(file, 1, detectionResult->screenWidth, detectionResult->screenHeight, quality);
             if (actualName == NULL) {
@@ -119,7 +105,6 @@ int handleGETRequest(int socket, char *filepath, char *userAgent, float quality)
                 strcpy(file, "");
                 strcat(file, "../files/cache/");
                 char cacheName[512] = "";
-                printf("ACTUAL NAME ASDASD: %s\n", actualName);
                 sprintf(cacheName, "%s-%d-%d-%d.jpg", actualName, (int)(quality*100), detectionResult->screenWidth, detectionResult->screenHeight);
                 strcat(file, cacheName);
                 printf("FILE TO BE SENT: %s\n", file);
@@ -129,31 +114,24 @@ int handleGETRequest(int socket, char *filepath, char *userAgent, float quality)
             
             /**
              * Not Mobile optimization
-             * TODO: Compress and send
-             * 
+             * Images for desktop (or unknow devices)
+             * are simply compressed using the quality factor.
             */
 
-            /**
-             * Verify if file is already in cache.
-            */
+            /* Verify if file is already in cache */
            
-            printf("FILE NOT MOBILE: %s\n", file);
             char filename[512] = "";
             strcat(filename, file);
-            printf("FILENAME NOT MOBILE: %s\n", filename);
+
             int cacheResult = verifyCache(filename, (int)(quality*100), 0, 0);
             if (cacheResult == 0) { //Cache hit
-                printf("CACHE HIT\n");
                 char filename[512] = "";
                 strcat(filename, file);
                 strcpy(file, "");
                 strcat(file, "../files/cache/");
-                printf("FILENAME CACHE HIT: %s\n", filename);
                 char *cacheName = buildCacheName(filename,(int)(quality*100), 0, 0);
-                printf("CACHE NAME CACHE HIT: %s\n", cacheName);
                 strcat(file, cacheName);
                 printf("FILE TO BE SENT ALREADY IN CACHE (NOT MOBILE): %s\n", file);
-                goto send;
             } else { //Cache miss
                 printf("File not in cache, compressing...(NOT MOBILE)\n");
                 char filename[512] = "";
@@ -172,14 +150,14 @@ int handleGETRequest(int socket, char *filepath, char *userAgent, float quality)
                 }
             }
 
-
         }
 
     }
 
 send:
 
-    //File operations
+    /* File operations */
+    //Open
     fd = open(file, O_RDONLY);
     if (fd == -1) {
         if (errno == EACCES) {
@@ -194,6 +172,7 @@ send:
             pthread_exit((void *)EXIT_FAILURE);
         }
     }
+    //Metadata of the file to be sent in the header
     struct stat st;
     fstat(fd, &st);
     int file_size = st.st_size;
@@ -234,14 +213,70 @@ send:
         }
 
         close(fd);  //Close file descriptor
-        printf("Closed FD\n");
-        printf("BYTES SENT: %d\n", bytes_sent);
         return bytes_sent;
     }
 
     return bytes_sent;
 }
 
-void handleHEADRequest(){
+
+/**
+ * Handles HEAD request
+ * @param socket The returning socker
+ * @param filepath The requested filepath
+ * @return bytes actually sent, ( > 0 success , otherwise error)
+*/
+int handleHEADRequest(int socket, char *filepath){
+
+    char file[512] = "../files";   //Base directory
+
+    //If nothing specified --> index.html
+    if (strcmp(filepath,"/") == 0) {
+        strcat(file, "/index.html");
+    }
+    else strcat(file, filepath);
+
+    printf("Handling HEAD Request on socket %d, file: %s\n", socket, file);
+
+
+    /** File operations 
+     * The file needs only to be opened to check his size
+     * File is not sent in the HEAD Request
+    */
+    //Open
+    fd = open(file, O_RDONLY);
+    if (fd == -1) {
+        if (errno == EACCES) {
+            perror("Permission Denied\n");
+            //Permission denied error 403 Forbidden;
+            sendErrorMessage(socket, 403);                    
+            pthread_exit((void *)EXIT_FAILURE);
+        } else {
+            perror("File does not exist HEAD\n");
+            //File not found error 404
+            sendErrorMessage(socket, 404);
+            pthread_exit((void *)EXIT_FAILURE);
+        }
+    }
+    //Metadata of the file to be sent in the header
+    struct stat st;
+    fstat(fd, &st);
+    int file_size = st.st_size;
+    printf("File size: %d\n", file_size);
+    char *mediaType = getContentType(file);   
+    printf("Media type: %s\n", mediaType);
+
+
+    //Send header message  
+    bytes_sent = sendHeaderMessage(socket, "HTTP/1.1 200 OK", mediaType, file_size);
+    if (bytes_sent <= 0) {
+        //Internal server error 500
+        sendErrorMessage(socket, 500);
+        pthread_exit((void *)EXIT_FAILURE);
+        return -1;
+    } else {
+        return bytes_sent;
+    }
+
 
 }

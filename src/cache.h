@@ -7,4 +7,4 @@
 
 int verifyCache(char *filename, int quality, int screenWidth, int screenHeight);
 char *buildCacheName(char *file, int quality, int screenWidth, int screenHeight);
-int searchInDir(char *dir, int depth, char *cacheName);
+int searchInDir(char *dir, char *cacheName);
