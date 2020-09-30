@@ -163,13 +163,9 @@ httpFieldsPtr parseHttpRequest(char *httpRequest) {
     }
     memset(resInfo, 0, sizeof(struct httpFields));
 
-    printf("\nPARSE HTTP REQUEST:\n%s\n", httpRequest);
     strcpy(resInfo->method, strtok(httpRequest, " \t\n"));
-    printf("RES INFO: %s\n", resInfo->method);
     strcpy(resInfo->file, strtok(NULL, " \t\n"));
-    printf("RES INFO: %s\n", resInfo->file);
     strcpy(resInfo->version, strtok(NULL, " \t\n"));
-    printf("RES INFO: %s\n", resInfo->version);
 
     return resInfo;
 }

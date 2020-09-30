@@ -13,7 +13,7 @@
  * @param filepath request file path
  * @return bytes actually sent if succesful, 0 or < 0 otherwise
 */
-int handleGETRequest(int socket, char *filepath, char *userAgent, float quality){
+int handleGETRequest(int socket, char *filepath, char *userAgent, float quality, int cacheDim){
 
     /**
      * TODO: Set up 51degress (n casin) or WURLF
@@ -39,8 +39,7 @@ int handleGETRequest(int socket, char *filepath, char *userAgent, float quality)
     if (detectionResult == NULL){
         printf("Error\n");
     } else {
-        printf("Success\n");
-        printf("DETECTION RESULTS : \n");
+        printf("\nDETECTION RESULTS : \n");
         printf("isMobile: %d\n", detectionResult->isMobile);
         printf("Screen Width: %d\n", detectionResult->screenWidth);
         printf("Screen Height: %d\n", detectionResult->screenHeight);
@@ -49,8 +48,10 @@ int handleGETRequest(int socket, char *filepath, char *userAgent, float quality)
     /**
      * Skip index.html and favicon.ico files from optimization.
     */
-    if ((strcmp(file, "../files/index.html")) == 0 || (strcmp(file, "../files/favicon.ico") == 0)) {
+    if ((strcmp(file, "../files/index.html")) == 0 || (strcmp(file, "../files/favicon.ico") == 0) || cacheDim == 0) {
         //Send file directly
+        if (cacheDim == 0) printf("Cache disabled by user\n");
+        else printf("File not an image, not cached\n");
     } else {
 
         /**
@@ -78,9 +79,9 @@ int handleGETRequest(int socket, char *filepath, char *userAgent, float quality)
             char filename[512] = "";
             strcat(filename, file);
             
-            int cacheResult = verifyCache(filename, (int)(quality*100), detectionResult->screenWidth, detectionResult->screenHeight );
+            int cacheResult = verifyCache(filename, (int)(quality*100), detectionResult->screenWidth, detectionResult->screenHeight);
             if (cacheResult == 0) {  //Cache hit
-
+                printf("CACHE HIT (MOBILE)\n");
                 strcpy(filename, "");
                 strcat(filename, file);
 
@@ -102,6 +103,7 @@ int handleGETRequest(int socket, char *filepath, char *userAgent, float quality)
             if (actualName == NULL) {
                 printf("Error compressing image: sending base quality\n");
             } else {
+                printf("CACHE MISS (MOBILE)\n");
                 strcpy(file, "");
                 strcat(file, "../files/cache/");
                 char cacheName[512] = "";
@@ -125,6 +127,7 @@ int handleGETRequest(int socket, char *filepath, char *userAgent, float quality)
 
             int cacheResult = verifyCache(filename, (int)(quality*100), 0, 0);
             if (cacheResult == 0) { //Cache hit
+                printf("CACHE HIT (NOT MOBILE)\n");
                 char filename[512] = "";
                 strcat(filename, file);
                 strcpy(file, "");
@@ -133,7 +136,7 @@ int handleGETRequest(int socket, char *filepath, char *userAgent, float quality)
                 strcat(file, cacheName);
                 printf("FILE TO BE SENT ALREADY IN CACHE (NOT MOBILE): %s\n", file);
             } else { //Cache miss
-                printf("File not in cache, compressing...(NOT MOBILE)\n");
+                printf("CACHE MISS (NOT MOBILE)\n");
                 char filename[512] = "";
                 strcat(filename, file);
                 char *actualName = compressAndCacheImg(filename, 0, 0, 0, quality);
@@ -166,7 +169,7 @@ send:
             sendErrorMessage(socket, 403);                    
             pthread_exit((void *)EXIT_FAILURE);
         } else {
-            perror("File does not exist HEAD\n");
+            perror("File does not exist GET\n");
             //File not found error 404
             sendErrorMessage(socket, 404);
             pthread_exit((void *)EXIT_FAILURE);

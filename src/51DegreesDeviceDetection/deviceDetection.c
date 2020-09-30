@@ -65,22 +65,17 @@ uaInfoStructPtr fiftyoneDegreesHashGettingStarted(const char *userAgent, const c
     if (EXCEPTION_FAILED) {
         printf("%s\n", ExceptionGetMessage(exception));
     }
-    printf("IsMobile: %s\n", getPropertyValueAsString(results, "IsMobile"));
     if (strcmp(getPropertyValueAsString(results, "IsMobile"),"True") == 0) {
         resultsStruct->isMobile = 1;
     } else {
         resultsStruct->isMobile = 0;
     }
-    printf("Screen Width: %s\n", getPropertyValueAsString(results, "ScreenPixelsWidth"));
     resultsStruct->screenWidth = atoi(getPropertyValueAsString(results, "ScreenPixelsWidth"));
-    printf("Screen Height: %s\n", getPropertyValueAsString(results, "ScreenPixelsHeight"));
     resultsStruct->screenHeight = atoi(getPropertyValueAsString(results, "ScreenPixelsHeight")); 
 
     ResultsHashFree(results);
     // Free the resources used by the manager.
     ResourceManagerFree(&manager);
-
-    printf("IS MOBILE: %d\n", resultsStruct->isMobile);
     return resultsStruct;
 }
 

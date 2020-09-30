@@ -26,5 +26,5 @@ int bytes_sent;
 int fd;
 
 //Function Prototypes
-int handleGETRequest(int socket, char *filepath, char *userAgent, float quality);
+int handleGETRequest(int socket, char *filepath, char *userAgent, float quality, int cacheDim);
 int handleHEADRequest(int socket, char *filepath);

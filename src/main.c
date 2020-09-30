@@ -3,10 +3,6 @@
 #define BACKLOG 10000
 #define MAX_BYTES 4096
 
-/* ---- JPEG IMAGE TEST ----- */
-
-
-
 int main(int argc, char const *argv[])
 {
 
@@ -236,9 +232,11 @@ void handleClientConnection(void *thread_params) {
          * Extract the User Agent string from the request
          * and the accept image quality value.
         */
+        
         char *userAgent = extractSubString(buffer, "User-Agent: ", "\n");
-        char *acceptHeader = extractSubString(buffer, "Accept: ", "\n");
-        char *qualityString = extracImageQualityAccept(acceptHeader);
+        //Comment this lines for HTTP Perf
+        char *acceptHeader = extractSubString(buffer, "Accept: ", "\n"); 
+        char *qualityString = extracImageQualityAccept(acceptHeader); //Comment for http perf
         float quality;
         if (qualityString == NULL) {
             quality = 1.0;
@@ -258,11 +256,7 @@ void handleClientConnection(void *thread_params) {
             exit(EXIT_FAILURE);
         }
         httpFieldsParsed = parseHttpRequest(buffer);   // Function parseHttpRequest --> utils.c
-        
-
-        int request_type = requestType(httpFieldsParsed->method);
-
-        printf("REQUEST TYPE: %d\n", request_type);
+        int request_type = requestType(httpFieldsParsed->method);  //Convert name method to int
 
         /*
         *   Different actions based on the method.
@@ -273,7 +267,7 @@ void handleClientConnection(void *thread_params) {
         {
             //GET
             case 1:
-                result_bytes = handleGETRequest(params->socket, httpFieldsParsed->file, userAgent, quality);
+                result_bytes = handleGETRequest(params->socket, httpFieldsParsed->file, userAgent, quality, cacheDim);
                 if (result_bytes > 0) {
                     printf("Sent succesfully to client: %s on socket: %d\n\n\n", params->ip_address, params->socket);
                 } else {
