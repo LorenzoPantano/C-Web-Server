@@ -5,6 +5,8 @@ const char *subsampName[TJ_NUMSAMP] = {
   "4:4:4", "4:2:2", "4:2:0", "Grayscale", "4:4:0", "4:1:1"
 };
 
+int pixelFormat = TJPF_UNKNOWN;
+
 
 /**
  * Compress And Cache Img
@@ -67,7 +69,6 @@ int compress(char *actualName, int quality) {
     unsigned char *imgBuf = NULL, *jpegBuf = NULL;
     long size;
     unsigned long jpegSize = 0;
-    int pixelFormat = TJPF_UNKNOWN;
     int flags = 0;
     int inColorspace;
     int width, height;
@@ -236,7 +237,6 @@ int compressAndResize(char *actualName, int screenWidth, int screenHeight, int q
     unsigned char *imgBuf = NULL, *jpegBuf = NULL;
     long size;
     unsigned long jpegSize = 0;
-    int pixelFormat = TJPF_UNKNOWN;
     int flags = 0;
     int inColorspace;
     int width, height;
